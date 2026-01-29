@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLAZIX LIVE API - REAL TIME DATA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #0a0a0f; 
+            color: white; 
+            font-family: monospace;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { text-align: center; padding: 30px 0; border-bottom: 2px solid #8b3bff; }
+        h1 { color: #00ff88; font-size: 2.5em; margin-bottom: 10px; }
+        .live-badge { 
+            background: #ff3b5c; 
+            color: white; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .api-list { margin: 30px 0; }
+        .api-item { 
+            background: #151522; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 10px;
+            border-left: 4px solid #8b3bff;
+        }
+        .method { 
+            background: #8b3bff; 
+            color: white; 
+            padding: 3px 10px; 
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .url { 
+            background: #1a1a2a; 
+            padding: 10px; 
+            margin: 10px 0; 
+            font-family: monospace;
+            color: #00ff88;
+            word-break: break-all;
+            border-radius: 5px;
+        }
+        button { 
+            background: #00ff88; 
+            color: #000; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover { background: #00cc66; }
+        pre { 
+            background: #000; 
+            padding: 15px; 
+            border-radius: 5px; 
+            overflow: auto; 
+            max-height: 400px;
+            border: 1px solid #333;
+        }
+        
+        .data-section {
+            background: rgba(139, 59, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(139, 59, 255, 0.3);
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .data-card {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        
+        .data-label {
+            color: #7d8da1;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .data-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .update-info {
+            color: #ffb83b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 BLAZIX S4 LIVE JSON API</h1>
+            <p style="color: #7d8da1;">REAL-TIME LOTTERY PREDICTIONS • UPDATES EVERY MINUTE</p>
+            <div class="live-badge" id="liveStatus">
+                ⚡ LIVE DATA FETCHING
+            </div>
+        </header>
+        
+        <div class="data-section">
+            <h2>📊 LIVE PREDICTION DATA</h2>
+            <div class="data-grid" id="liveData">
+                <!-- Will be populated by JavaScript -->
+                <div class="data-card">
+                    <div class="data-label">LOADING</div>
+                    <div class="data-value">...</div>
+                </div>
+            </div>
+            <div class="update-info" id="updateTime">
+                Last update: Loading...
+            </div>
+        </div>
+        
+        <div class="api-list">
+            <h2>🔗 LIVE JSON ENDPOINTS</h2>
+            <p style="color: #7d8da1; margin-bottom: 20px;">These endpoints serve REAL data from lottery API</p>
+            
+            <div class="api-item">
+                <span class="method">GET</span>
+                <h3>Current Prediction (LIVE)</h3>
+                <div class="url" id="urlCurrent">/api/current.json</div>
+                <button onclick="fetchLiveData('current')">📡 FETCH LIVE DATA</button>
+                <button onclick="window.open('/api/current.json', '_blank')">🔗 OPEN JSON</button>
+            </div>
+            
+            <div class="api-item">
+                <span class="method">GET</span>
+                <h3>All Data (LIVE)</h3>
+                <div class="url" id="urlAll">/api/all.json</div>
+                <button onclick="fetchLiveData('all')">📡 FETCH LIVE DATA</button>
+                <button onclick="window.open('/api/all.json', '_blank')">🔗 OPEN JSON</button>
+            </div>
+            
+            <div class="api-item">
+                <span class="method">GET</span>
+                <h3>Previous Results (LIVE)</h3>
+                <div class="url" id="urlPrevious">/api/previous.json</div>
+                <button onclick="fetchLiveData('previous')">📡 FETCH LIVE DATA</button>
+                <button onclick="window.open('/api/previous.json', '_blank')">🔗 OPEN JSON</button>
+            </div>
+            
+            <div class="api-item">
+                <span class="method">GET</span>
+                <h3>Calculate Prediction</h3>
+                <div class="url">/api/calculate.json?numbers=5,8,4,5,4,6,4,8,5,2</div>
+                <button onclick="testCalculation()">🧮 TEST CALCULATION</button>
+            </div>
+        </div>
+        
+        <div class="data-section">
+            <h2>📄 JSON RESPONSE</h2>
+            <pre id="jsonOutput">{
+  "message": "Click 'FETCH LIVE DATA' to see real JSON"
+}</pre>
+            <div class="update-info" id="responseStatus">
+                Status: Ready to fetch live data
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #333;">
+            <p style="color: #7d8da1;">⚡ Data updates automatically every minute</p>
+            <p style="color: #7d8da1; font-size: 12px;">Using real lottery API: https://draw.ar-lottery01.com</p>
+        </div>
+    </div>
+    
+    <script>
+        // Update URLs with current domain
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+        document.getElementById('urlCurrent').textContent = baseUrl + '/api/current.json';
+        document.getElementById('urlAll').textContent = baseUrl + '/api/all.json';
+        document.getElementById('urlPrevious').textContent = baseUrl + '/api/previous.json';
+        
+        async function fetchLiveData(endpoint) {
+            document.getElementById('responseStatus').textContent = 'Status: Fetching LIVE data from lottery API...';
+            document.getElementById('liveStatus').style.background = '#ffb83b';
+            document.getElementById('liveStatus').textContent = '🔄 FETCHING LIVE DATA...';
+            
+            try {
+                // Fetch from our live API endpoint
+                const response = await fetch(`api/${endpoint}.json?t=${Date.now()}`);
+                const data = await response.json();
+                
+                // Display JSON
+                document.getElementById('jsonOutput').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('responseStatus').textContent = 
+                    `Status: ✅ LIVE DATA FETCHED at ${new Date().toLocaleTimeString()}`;
+                
+                // Update live data display
+                updateLiveDisplay(data);
+                
+                // Update status
+                document.getElementById('liveStatus').style.background = '#00ff88';
+                document.getElementById('liveStatus').textContent = '✅ LIVE DATA READY';
+                document.getElementById('updateTime').textContent = 
+                    `Last update: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                document.getElementById('jsonOutput').textContent = `{
+  "error": "Failed to fetch live data",
+  "message": "${error.message}",
+  "timestamp": "${new Date().toISOString()}"
+}`;
+                document.getElementById('responseStatus').textContent = 'Status: ❌ Failed to fetch live data';
+                document.getElementById('liveStatus').style.background = '#ff3b5c';
+                document.getElementById('liveStatus').textContent = '❌ API ERROR';
+            }
+        }
+        
+        function updateLiveDisplay(data) {
+            const liveDataDiv = document.getElementById('liveData');
+            
+            if (data.prediction) {
+                // For current.json response
+                liveDataDiv.innerHTML = `
+                    <div class="data-card">
+                        <div class="data-label">PERIOD</div>
+                        <div class="data-value">${data.period || '---'}</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">PREDICTION</div>
+                        <div class="data-value" style="color: ${data.prediction === 'BIG' ? '#00ff88' : '#ff3b5c'}">
+                            ${data.prediction}
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">NUMBER</div>
+                        <div class="data-value">${data.derived_number || '--'}</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">CONFIDENCE</div>
+                        <div class="data-value">${data.confidence || '--'}%</div>
+                    </div>
+                `;
+            } else if (data.current_prediction) {
+                // For all.json response
+                const cp = data.current_prediction;
+                liveDataDiv.innerHTML = `
+                    <div class="data-card">
+                        <div class="data-label">PERIOD</div>
+                        <div class="data-value">${cp.period || '---'}</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">PREDICTION</div>
+                        <div class="data-value" style="color: ${cp.prediction === 'BIG' ? '#00ff88' : '#ff3b5c'}">
+                            ${cp.prediction}
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">NUMBER</div>
+                        <div class="data-value">${cp.derived_number || '--'}</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">CONFIDENCE</div>
+                        <div class="data-value">${cp.confidence || '--'}%</div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testCalculation() {
+            const numbers = [5, 8, 4, 5, 4, 6, 4, 8, 5, 2];
+            
+            // Calculate using your custom logic
+            const result = calculatePrediction(numbers);
+            
+            const response = {
+                numbers: numbers,
+                calculation: result.calculation,
+                result: {
+                    prediction: result.prediction,
+                    derived_number: result.derivedNumber,
+                    confidence: result.confidence
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('jsonOutput').textContent = JSON.stringify(response, null, 2);
+            document.getElementById('responseStatus').textContent = 
+                `Status: Calculation complete at ${new Date().toLocaleTimeString()}`;
+            
+            updateLiveDisplay({
+                period: 'CUSTOM',
+                prediction: result.prediction,
+                derived_number: result.derivedNumber,
+                confidence: result.confidence
+            });
+        }
+        
+        // Your custom calculation logic
+        function calculatePrediction(numbers) {
+            if (numbers.length < 10) {
+                return {
+                    prediction: "BIG",
+                    derivedNumber: 7,
+                    confidence: 70,
+                    calculation: { error: "Need 10 numbers" }
+                };
+            }
+            
+            const last10 = numbers.slice(0, 10);
+            const first = last10[0];
+            const fifth = last10[4];
+            let sum = first + fifth;
+            
+            if (sum >= 10) sum = Math.floor(sum/10) + (sum%10);
+            
+            const last = last10[9];
+            let result = sum - last;
+            if (result < 0) result = -result;
+            if (result >= 10) result = Math.floor(result/10) + (result%10);
+            
+            const prediction = result >= 5 ? "BIG" : "SMALL";
+            let confidence = 70;
+            if (result === 0 || result === 9) confidence = 85;
+            else if (result <= 2 || result >= 7) confidence = 75;
+            
+            return {
+                prediction,
+                derivedNumber: result,
+                confidence: Math.min(95, Math.max(55, confidence)),
+                calculation: {
+                    formula: "(first + fifth) - last",
+                    first_number: first,
+                    fifth_number: fifth,
+                    last_number: last,
+                    result: result
+                }
+            };
+        }
+        
+        // Auto-fetch data on page load
+        window.onload = async () => {
+            try {
+                const response = await fetch('api/current.json?t=' + Date.now());
+                const data = await response.json();
+                updateLiveDisplay(data);
+                document.getElementById('updateTime').textContent = 
+                    `Last update: ${new Date(data.timestamp || data.last_updated).toLocaleTimeString()}`;
+            } catch (error) {
+                console.log('Initial fetch failed');
+            }
+        };
+        
+        // Auto-refresh every 30 seconds
+        setInterval(async () => {
+            try {
+                const response = await fetch('api/current.json?t=' + Date.now());
+                const data = await response.json();
+                updateLiveDisplay(data);
+                document.getElementById('updateTime').textContent = 
+                    `Last update: ${new Date().toLocaleTimeString()}`;
+            } catch (error) {
+                // Silently fail
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
